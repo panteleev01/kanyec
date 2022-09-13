@@ -6,7 +6,6 @@ import org.kanyec.ast._
 
 class KanyeParser extends Parser {
 
-
   val ParseError = "BALLING TOO HARD"
 
   val DeclareInt = "I am god's vessel"

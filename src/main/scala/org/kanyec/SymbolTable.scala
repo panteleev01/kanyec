@@ -12,69 +12,62 @@ case class SymbolTable(upperLevel: Option[SymbolTable], currentMethod: String) {
 
   val initialNextVarAddress: Int = FirstSymbolTableAddress
 
-  def size(): Int = {
+  def size: Int = 
     initialNextVarAddress + variableTable.size
-  }
+  
 
-  def getStackFrame: Array[AnyRef] = {
-    Stream.iterate(INTEGER: AnyRef) {
-      i => i
-    }.take(size()).toArray
-  }
+  def getStackFrame: Array[AnyRef] = 
+    Stream
+      .iterate(INTEGER: AnyRef)(identity)
+      .take(size())
+      .toArray
+  
 
   def putVariable(variableName: String) = {
     val newVarAddress = initialNextVarAddress + variableTable.size
-    if (variableTable.contains(variableName)) {
-      throw new ParsingException("DUPLICATE VARIABLE: " + variableName)
-    }
+    if (variableTable.contains(variableName)) 
+      throw new ParsingException(s"DUPLICATE VARIABLE: $variableName")
     variableTable += (variableName -> newVarAddress)
   }
 
-  def getVariableAddress(variableName: String): Integer = {
+  def getVariableAddress(variableName: String): Integer = 
     variableTable.getOrElse(variableName, {
-      if (upperLevel.isEmpty) {
-        throw new ParsingException("VARIABLE: " + variableName + " NOT DECLARED!")
-      }
-      upperLevel.get.getVariableAddress(variableName)
+      if (upperLevel.isEmpty) 
+        throw new ParsingException(s"VARIABLE: $variableName NOT DECLARED!")
+      else 
+        upperLevel.get.getVariableAddress(variableName)
     })
-  }
+  
 
-  def putMethod(methodName: String, methodInformation: MethodInformation) = {
+  def putMethod(methodName: String, methodInformation: MethodInformation) = 
     methodTable.put(methodName, methodInformation)
-  }
+  
 
-  def getMethodDescription(methodName: String): String = {
-    if (methodName.equals("main")) {
-      "([Ljava/lang/String;)V"
-    }
+  def getMethodDescription(methodName: String): String = 
+    if (methodName.equals("main")) "([Ljava/lang/String;)V"
     else {
       val method = getMethodInformation(methodName)
       val numberOfArguments = method.numberOfArguments
       val returnValue = if (method.returnsValue) "I" else "V"
       "(" + "I" * numberOfArguments + ")" + returnValue
     }
-  }
+  
 
-  def getCurrentMethod(): MethodInformation = {
+  def getCurrentMethod: MethodInformation = 
     getMethodInformation(currentMethod)
-  }
+  
 
-  def getMethodInformation(methodName: String): MethodInformation = {
+  def getMethodInformation(methodName: String): MethodInformation = 
     methodTable.getOrElse(methodName, {
       if (upperLevel.isEmpty) {
         throw new ParsingException("METHOD: " + methodName + " NOT DECLARED!")
       }
       upperLevel.get.getMethodInformation(methodName)
     })
-  }
+  
 
-  def getFileName(): String = {
-    if (upperLevel.isEmpty) {
-      currentMethod
-    }
-    else {
-      upperLevel.get.getFileName()
-    }
-  }
+  def getFileName: String = 
+    if (upperLevel.isEmpty) currentMethod
+    else upperLevel.get.getFileName
 
 }
